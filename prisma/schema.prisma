@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.pnpm/@prisma+client@5.10.0_prisma@5.10.0/node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PracticeMode {
+  FREE_TALK
+  ROLE_PLAY
+  REPEAT
+}
+
+enum Speaker {
+  STUDENT
+  AI
+}
+
+enum SessionStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  EVALUATED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions        PracticeSession[]
+  evaluationReports EvaluationReport[]
+}
+
+model PracticeSession {
+  id        String   @id @default(cuid())
+  userId    String?
+  mode      PracticeMode
+  topic     String?
+  language  String   @default("en")
+  level     String   @default("intermediate")
+  scenario  String?  // For role play mode
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+  durationSeconds Int?
+  status    SessionStatus @default(PENDING)
+  audioUrl  String?        // Full session recording URL
+
+  user       User?          @relation(fields: [userId], references: [id])
+  turns      PracticeTurn[]
+  report     EvaluationReport?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model PracticeTurn {
+  id         String   @id @default(cuid())
+  sessionId  String
+  turnIndex  Int
+  speaker    Speaker
+  transcript String?
+  audioUrl   String?
+  metadata   Json?    // Contains timing, confidence scores, etc.
+  createdAt  DateTime @default(now())
+
+  session PracticeSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@index([speaker])
+}
+
+model EvaluationReport {
+  id                   String   @id @default(cuid())
+  sessionId            String   @unique
+  pronunciationScore   Float?
+  fluencyScore         Float?
+  grammarScore         Float?
+  vocabularyScore      Float?
+  taskCompletionScore  Float?
+  overallScore         Float?
+  strengthsJson        Json?    // string[]
+  weaknessesJson       Json?    // string[]
+  errorTagsJson        Json?    // string[]
+  suggestedExpressionsJson Json? // string[]
+  nextStepAdviceJson   Json?    // string[]
+  rawLlmOutput         String?
+  createdAt            DateTime @default(now())
+
+  session PracticeSession @relation(fields: [sessionId], references: [id])
+  user    User?       @relation(fields: [userId], references: [id])
+  userId  String?
+}
+
+// Prompt templates for different modes
+model PromptTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  mode        PracticeMode
+  language    String   @default("en")
+  systemPrompt String
+  variables   Json?    // Available variables for this template
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

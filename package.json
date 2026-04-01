@@ -1,0 +1,26 @@
+{
+  "name": "students-talk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:server": "pnpm --filter @students-talk/server dev",
+    "dev:web": "pnpm --filter @students-talk/web dev",
+    "build": "pnpm run build:server && pnpm run build:web",
+    "build:server": "pnpm --filter @students-talk/server build",
+    "build:web": "pnpm --filter @students-talk/web build",
+    "start:server": "pnpm --filter @students-talk/server start",
+    "start:web": "pnpm --filter @students-talk/web start",
+    "db:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "db:push": "prisma db push --schema=./prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=./prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prisma": "5.10.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "dependencies": {
+    "@prisma/client": "5.10.0"
+  }
+}
