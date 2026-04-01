@@ -1,11 +1,12 @@
-# Students Talk - AI 口语练习应用
+# Students Talk - AI 英语口语练习平台
 
-基于 **Qwen-Omni-Realtime** 大模型开发的实时英语口语练习 Web 应用。
+基于 **Qwen-Omni-Realtime** 大模型的实时英语口语练习 Web 应用，支持语音对话 + **全模态 AI 评估**（文本 + 音频分析）。
 
 ## ✨ 核心功能
 
-- **🎙️ 实时语音对话** - 低延迟的实时语音交互，支持自然打断
-- **📊 结构化评估** - 发音、流利度、语法、词汇、任务完成度五维评分
+- **🎙️ 实时语音对话** - 基于 Qwen-Omni-Realtime WebSocket 的低延迟语音交互
+- **📊 全模态 AI 评估** - 使用 Qwen3-Omni-Flash 同时分析对话文本和录音音频，从发音、流利度、语法、词汇、任务完成度五个维度生成**中文评估报告**
+- **🔴 录音保存** - 自动保存练习录音（PCM → WAV），供 AI 进行语音分析
 - **🎭 多种练习模式** - 自由对话、情景角色扮演、跟读复述
 - **📈 历史记录追踪** - 查看过往练习报告和进步轨迹
 
@@ -36,7 +37,8 @@ students-talk/
 - NestJS
 - WebSocket (Socket.IO)
 - Prisma ORM
-- Qwen-Omni-Realtime API
+- Qwen-Omni-Realtime API（实时语音对话）
+- Qwen3-Omni-Flash API（全模态评估，DashScope 兼容模式）
 
 **数据库**
 - PostgreSQL
@@ -72,8 +74,12 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/students-talk?schema=
 
 # Qwen-Omni API 配置
 QWEN_API_KEY=your_api_key_here
-QWEN_MODEL=qwen3.5-omni-plus-realtime
+QWEN_MODEL=qwen-omni-flash-realtime
 QWEN_WS_URL=wss://dashscope.aliyuncs.com/api-ws/v1/inference/
+
+# 评估模型（全模态，支持音频分析）
+# 使用 DashScope 兼容模式 API
+QWEN_EVAL_MODEL=qwen3-omni-flash
 
 # 服务端口
 PORT=3001
@@ -186,7 +192,7 @@ students-talk/
 │   ├── server/
 │   │   └── src/
 │   │       ├── prisma/           # 数据库服务
-│   │       ├── qwen-omni/        # Qwen API 服务
+│   │       ├── evaluation/        # AI 评估服务 (Qwen3-Omni-Flash)
 │   │       ├── ws/               # WebSocket 网关
 │   │       ├── sessions/         # REST 控制器
 │   │       └── main.ts
@@ -241,7 +247,9 @@ pnpm db:migrate    # 运行迁移
 
 ## 📝 TODO
 
-- [ ] 接入真实 LLM 评估接口
+- [x] 接入 Qwen3-Omni-Flash 全模态评估（文本 + 音频分析）
+- [x] 录音保存与 AI 语音分析
+- [x] 中文评估报告输出
 - [ ] 添加用户认证系统
 - [ ] 支持音频文件上传复审
 - [ ] 添加词汇本功能
